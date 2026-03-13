@@ -275,8 +275,7 @@
     width: 1500px;
     height: 960px;
     top: 0; left: 0;
-    transform-origin: top left;
-    /* translate + scale applied by JS */
+    /* transform set by JS */
   }
 
   #mobile-pan-canvas {
@@ -662,9 +661,8 @@ function resizeDesktopCanvas() {
 // ════════════════════════════════════════════════════════
 //  MOBILE LANDSCAPE — pannable world
 // ════════════════════════════════════════════════════════
-const WORLD_W  = 1500;
-const WORLD_H  = 960;
-const MOBILE_SCALE = 0.62; // zoomed-out factor — raise to zoom in, lower to zoom out more
+const WORLD_W = 1500;
+const WORLD_H = 960;
 
 const panViewport = document.getElementById('mobile-pan-viewport');
 const panWorld    = document.getElementById('mobile-pan-world');
@@ -682,16 +680,13 @@ let tapStartX = 0, tapStartY = 0, tapMoved = false;
 function clampPan(x, y) {
   const vw = window.innerWidth;
   const vh = window.innerHeight - 48;
-  // Scaled world dimensions
-  const sw = WORLD_W * MOBILE_SCALE;
-  const sh = WORLD_H * MOBILE_SCALE;
   return {
-    x: Math.max(Math.min(0, vw - sw), Math.min(0, x)),
-    y: Math.max(Math.min(0, vh - sh), Math.min(0, y)),
+    x: Math.max(Math.min(0, vw - WORLD_W), Math.min(0, x)),
+    y: Math.max(Math.min(0, vh - WORLD_H), Math.min(0, y)),
   };
 }
 function applyPan() {
-  panWorld.style.transform = `translate(${panX}px, ${panY}px) scale(${MOBILE_SCALE})`;
+  panWorld.style.transform = `translate(${panX}px, ${panY}px)`;
 }
 
 panViewport.addEventListener('touchstart', e => {
@@ -710,6 +705,10 @@ panViewport.addEventListener('touchmove', e => {
   lastTX = e.touches[0].clientX;
   lastTY = e.touches[0].clientY;
   if (Math.abs(dx) > 3 || Math.abs(dy) > 3) tapMoved = true;
+  // Only mark as a drag (not tap) if finger moved more than 10px total
+  const totalDx = e.touches[0].clientX - tapStartX;
+  const totalDy = e.touches[0].clientY - tapStartY;
+  if (Math.abs(totalDx) > 10 || Math.abs(totalDy) > 10) tapMoved = true;
   const c = clampPan(panX + dx, panY + dy);
   panX = c.x; panY = c.y;
   applyPan();
@@ -718,17 +717,15 @@ panViewport.addEventListener('touchmove', e => {
 panViewport.addEventListener('touchend', e => {
   dragging = false;
   if (!tapMoved) {
-    // Convert screen tap coords to world coords (undo pan + scale)
-    const wx = (tapStartX - panX) / MOBILE_SCALE;
-    const wy = (tapStartY - panY) / MOBILE_SCALE;
+    // Use the card's actual screen rect — getBoundingClientRect works correctly
+    // even inside a scaled/translated parent, no math needed
+    const tx = tapStartX;
+    const ty = tapStartY;
     nodes.forEach(n => {
       const el = document.getElementById(`mob-node-${n.id}`);
       if (!el) return;
-      const cx = parseFloat(el.style.left);
-      const cy = parseFloat(el.style.top);
-      const hw = el.offsetWidth / 2 + 10;
-      const hh = el.offsetHeight / 2 + 10;
-      if (wx >= cx - hw && wx <= cx + hw && wy >= cy - hh && wy <= cy + hh) {
+      const r = el.getBoundingClientRect();
+      if (tx >= r.left && tx <= r.right && ty >= r.top && ty <= r.bottom) {
         handleClick(n);
       }
     });
@@ -758,10 +755,10 @@ function buildMobilePan() {
     panWorld.appendChild(el);
   });
 
-  // Start centered — account for scale so the graph sits in the middle of the viewport
+  // Start centered on the graph
   const vw = window.innerWidth;
   const vh = window.innerHeight - 48;
-  const c = clampPan((vw - WORLD_W * MOBILE_SCALE) / 2, (vh - WORLD_H * MOBILE_SCALE) / 2);
+  const c = clampPan((vw - WORLD_W) / 2, (vh - WORLD_H) / 2);
   panX = c.x; panY = c.y;
   applyPan();
   panViewport.style.display = 'block';
