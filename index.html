@@ -717,15 +717,16 @@ panViewport.addEventListener('touchmove', e => {
 panViewport.addEventListener('touchend', e => {
   dragging = false;
   if (!tapMoved) {
-    // Use the card's actual screen rect — getBoundingClientRect works correctly
-    // even inside a scaled/translated parent, no math needed
-    const tx = tapStartX;
-    const ty = tapStartY;
+    // Use where the finger actually lifted, not where it landed
+    const touch = e.changedTouches[0];
+    const tx = touch.clientX;
+    const ty = touch.clientY;
     nodes.forEach(n => {
       const el = document.getElementById(`mob-node-${n.id}`);
       if (!el) return;
       const r = el.getBoundingClientRect();
-      if (tx >= r.left && tx <= r.right && ty >= r.top && ty <= r.bottom) {
+      // Expand hit area by 16px on all sides for easier tapping
+      if (tx >= r.left - 16 && tx <= r.right + 16 && ty >= r.top - 16 && ty <= r.bottom + 16) {
         handleClick(n);
       }
     });
