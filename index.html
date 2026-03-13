@@ -258,32 +258,68 @@
     .node { display: none !important; }
   }
 
-  /* Landscape on a phone — render the graph, shrink nodes */
+  /* ── Mobile landscape: pannable infinite canvas ── */
+  #mobile-pan-viewport {
+    display: none; /* shown by JS in landscape mobile */
+    position: fixed;
+    top: 48px; left: 0; right: 0; bottom: 0;
+    overflow: hidden;
+    touch-action: none; /* we handle touch manually */
+    cursor: grab;
+    z-index: 5;
+  }
+  #mobile-pan-viewport:active { cursor: grabbing; }
+
+  #mobile-pan-world {
+    position: absolute;
+    width: 1500px;
+    height: 960px;
+    top: 0; left: 0;
+    /* transform set by JS */
+  }
+
+  #mobile-pan-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+  }
+
+  /* nodes inside the pan world are absolute, not fixed */
+  #mobile-pan-world .node {
+    position: absolute !important;
+    transform: translate(-50%, -50%) !important;
+    cursor: pointer;
+    z-index: 10;
+  }
+
+  /* Compact node sizes for mobile */
+  #mobile-pan-world .node-card {
+    padding: 9px 13px;
+    min-width: 118px !important;
+    font-size: 0.9rem;
+  }
+  #mobile-pan-world .node.main .node-card  { min-width: 150px !important; padding: 12px 16px; }
+  #mobile-pan-world .node.capital .node-card { min-width: 132px !important; }
+  #mobile-pan-world .node-label { font-size: 0.82rem; margin-bottom: 2px; }
+  #mobile-pan-world .node.main .node-label { font-size: 0.95rem; }
+  #mobile-pan-world .node-desc { font-size: 0.54rem; margin-bottom: 7px; line-height: 1.4; }
+  #mobile-pan-world .node-footer { gap: 6px; }
+  #mobile-pan-world .status { font-size: 0.5rem; }
+  #mobile-pan-world .status-dot { width: 4px; height: 4px; }
+  #mobile-pan-world .node-type { font-size: 0.46rem; }
+  #mobile-pan-world .badge { font-size: 0.44rem; padding: 1px 5px; top: -7px; right: 8px; }
+  #mobile-pan-world .open-hint { display: none; }
+
+  /* mobile header strip */
   @media (max-height: 500px) and (orientation: landscape) {
-    header {
-      padding: 0 20px;
-      height: 48px;
-    }
+    header { padding: 0 20px; height: 48px; }
     .logo { font-size: 0.95rem; }
     .logo span { display: none; }
     .header-right { font-size: 0.56rem; gap: 16px; }
-
-    .node-card {
-      padding: 8px 12px;
-      min-width: 110px !important;
-    }
-    .node.main .node-card  { min-width: 140px !important; padding: 10px 14px; }
-    .node.capital .node-card { min-width: 124px !important; }
-
-    .node-label { font-size: 0.78rem; margin-bottom: 2px; }
-    .node.main .node-label { font-size: 0.9rem; }
-    .node-desc { font-size: 0.52rem; margin-bottom: 6px; line-height: 1.4; }
-    .node-footer { gap: 6px; }
-    .status { font-size: 0.48rem; }
-    .status-dot { width: 4px; height: 4px; }
-    .node-type { font-size: 0.44rem; }
-    .badge { font-size: 0.42rem; padding: 1px 5px; top: -7px; right: 8px; }
-    .open-hint { font-size: 0.44rem; bottom: -18px; }
+    /* hide the fixed desktop nodes & canvas — mobile uses pan world */
+    body > .node, #canvas { display: none !important; }
+    body::before { display: none !important; }
   }
 </style>
 </head>
@@ -315,13 +351,25 @@
 }
 </style>
 
+<!-- MOBILE PAN VIEWPORT — landscape only -->
+<div id="mobile-pan-viewport">
+  <div id="mobile-pan-world">
+    <canvas id="mobile-pan-canvas"></canvas>
+    <!-- nodes injected here by JS -->
+  </div>
+  <!-- pan hint -->
+  <div id="pan-hint" style="position:absolute;bottom:14px;left:50%;transform:translateX(-50%);font-family:var(--body);font-size:0.52rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--mid);opacity:0.6;pointer-events:none;white-space:nowrap;">
+    drag to pan
+  </div>
+</div>
+
 <!-- PASSWORD OVERLAY -->
 <div id="pw-overlay" style="position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;">
   <div style="position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(0,0,0,0.022) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,0.022) 1px,transparent 1px);background-size:52px 52px;"></div>
   <div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;width:100%;max-width:320px;padding:0 24px;">
-    <div style="font-family:var(--body);font-size:0.58rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--mid);margin-bottom:18px;text-align:center;">Internal Access</div>
-    <div style="font-family:var(--display);font-size:2rem;font-weight:300;font-style:italic;color:var(--black);margin-bottom:6px;text-align:center;line-height:1.1;">Firm Hub</div>
-    <div style="font-family:var(--body);font-size:0.78rem;color:var(--mid);margin-bottom:36px;text-align:center;">Restricted access. Authorised personnel only.</div>
+    <div style="font-family:var(--body);font-size:0.58rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--mid);margin-bottom:18px;text-align:center;">Internal Apps</div>
+    <div style="font-family:var(--display);font-size:2rem;font-weight:300;font-style:italic;color:var(--black);margin-bottom:6px;text-align:center;line-height:1.1;">BAYFALL MORRIGAN: Proprietary Material Hub</div>
+    <div style="font-family:var(--body);font-size:0.78rem;color:var(--mid);margin-bottom:36px;text-align:center;">Authorised personnel only.</div>
     <div style="width:40px;height:1px;background:var(--rule);margin-bottom:36px;"></div>
     <input id="pw-input" type="password" placeholder="Password" autocomplete="off"
       style="font-family:var(--body);font-size:1rem;color:var(--black);background:transparent;border:none;border-bottom:1px solid #b5b2aa;padding:6px 0;outline:none;width:100%;text-align:center;letter-spacing:0.1em;margin-bottom:20px;"
@@ -505,130 +553,248 @@ const edges = [
   ['capital', 'backtest'],
 ];
 
-// Portrait on a phone = show rotate prompt, hide graph
-// Landscape (any size) = render the graph
+// ════════════════════════════════════════════════════════
+//  Orientation helpers
+// ════════════════════════════════════════════════════════
 function isPortraitMobile() {
   return window.innerWidth < 900 && window.innerHeight > window.innerWidth;
 }
+function isLandscapeMobile() {
+  return window.innerWidth < 1024 && window.innerHeight <= window.innerWidth && window.innerHeight < 520;
+}
+
+function handleClick(n) {
+  if (n.download) {
+    const a = document.createElement('a');
+    a.href = n.download; a.download = '';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  } else if (n.url) {
+    window.open(n.url, '_blank');
+  }
+}
+
+function nodeCardHTML(n) {
+  return `
+    <div class="node-card">
+      ${n.badge ? `<div class="badge">${n.badge}</div>` : ''}
+      <div class="node-label">${n.label}</div>
+      <div class="node-desc">${n.desc}</div>
+      <div class="node-footer">
+        <div class="status ${n.status}">
+          <div class="status-dot"></div>${n.status}
+        </div>
+        <div class="node-type">${n.type}</div>
+      </div>
+    </div>
+    <div class="open-hint">${n.download ? '↓ download zip' : '↗ open'}</div>
+  `;
+}
 
 // ════════════════════════════════════════════════════════
-//  Build DOM — graph nodes (used for all orientations)
+//  DESKTOP — fixed-position nodes + animated canvas
 // ════════════════════════════════════════════════════════
+const desktopCanvas = document.getElementById('canvas');
+const desktopCtx    = desktopCanvas.getContext('2d');
+let desktopT = 0;
+let desktopAnim = false;
+
 function buildDesktop() {
-  const mg = document.getElementById('mobile-grid');
-  if (mg) mg.remove();
-
+  document.querySelectorAll('#mobile-pan-world .node').forEach(el => el.remove());
   nodes.forEach(n => {
     let el = document.getElementById(`node-${n.id}`);
     if (!el) {
       el = document.createElement('div');
       el.className = `node ${n.cls || ''}`;
       el.id = `node-${n.id}`;
+      el.addEventListener('click', () => handleClick(n));
+      document.body.appendChild(el);
     }
     el.style.left = n.pos[0] + 'vw';
     el.style.top  = n.pos[1] + 'vh';
     el.style.position = 'fixed';
-
-    el.innerHTML = `
-      <div class="node-card">
-        ${n.badge ? `<div class="badge">${n.badge}</div>` : ''}
-        <div class="node-label">${n.label}</div>
-        <div class="node-desc">${n.desc}</div>
-        <div class="node-footer">
-          <div class="status ${n.status}">
-            <div class="status-dot"></div>${n.status}
-          </div>
-          <div class="node-type">${n.type}</div>
-        </div>
-      </div>
-      <div class="open-hint">${n.download ? '↓ download zip' : '↗ open'}</div>
-    `;
-
-    el.addEventListener('click', () => handleClick(n));
-    document.body.appendChild(el);
+    el.style.display  = '';
+    el.innerHTML = nodeCardHTML(n);
   });
 }
 
-function handleClick(n) {
-  if (n.download) {
-    const a = document.createElement('a');
-    a.href = n.download;
-    a.download = '';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  } else if (n.url) {
-    window.open(n.url, '_blank');
-  }
-}
-
-// ════════════════════════════════════════════════════════
-//  Canvas edges — desktop only
-// ════════════════════════════════════════════════════════
-const canvas = document.getElementById('canvas');
-const ctx    = canvas.getContext('2d');
-let t = 0;
-let animRunning = false;
-
-function nodeCenter(id) {
+function desktopNodeCenter(id) {
   const el = document.getElementById(`node-${id}`);
   if (!el) return null;
   const r = el.getBoundingClientRect();
   return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
 }
 
-function draw() {
-  if (!animRunning) return;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  t += 0.003;
-
+function drawDesktop() {
+  if (!desktopAnim) return;
+  desktopCtx.clearRect(0, 0, desktopCanvas.width, desktopCanvas.height);
+  desktopT += 0.003;
   edges.forEach(([a, b], i) => {
-    const p1 = nodeCenter(a);
-    const p2 = nodeCenter(b);
+    const p1 = desktopNodeCenter(a);
+    const p2 = desktopNodeCenter(b);
     if (!p1 || !p2) return;
-
     const isGold    = a === 'main'    || b === 'main';
     const isCapital = a === 'capital' || b === 'capital';
-
-    const grad = ctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
-    if (isGold) {
-      grad.addColorStop(0, 'rgba(138,106,42,0.5)');
-      grad.addColorStop(1, 'rgba(138,106,42,0.08)');
-    } else if (isCapital) {
-      grad.addColorStop(0, 'rgba(42,79,138,0.42)');
-      grad.addColorStop(1, 'rgba(42,79,138,0.06)');
-    } else {
-      grad.addColorStop(0, 'rgba(0,0,0,0.12)');
-      grad.addColorStop(1, 'rgba(0,0,0,0.03)');
-    }
-
-    ctx.beginPath();
-    ctx.moveTo(p1.x, p1.y);
-    ctx.lineTo(p2.x, p2.y);
-    ctx.strokeStyle = grad;
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    // Traveling dot
-    const phase = (t * 0.55 + i * 0.41) % 1;
-    const dotX = p1.x + (p2.x - p1.x) * phase;
-    const dotY = p1.y + (p2.y - p1.y) * phase;
+    const grad = desktopCtx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
+    if (isGold) { grad.addColorStop(0,'rgba(138,106,42,0.5)'); grad.addColorStop(1,'rgba(138,106,42,0.08)'); }
+    else if (isCapital) { grad.addColorStop(0,'rgba(42,79,138,0.42)'); grad.addColorStop(1,'rgba(42,79,138,0.06)'); }
+    else { grad.addColorStop(0,'rgba(0,0,0,0.12)'); grad.addColorStop(1,'rgba(0,0,0,0.03)'); }
+    desktopCtx.beginPath(); desktopCtx.moveTo(p1.x,p1.y); desktopCtx.lineTo(p2.x,p2.y);
+    desktopCtx.strokeStyle = grad; desktopCtx.lineWidth = 1; desktopCtx.stroke();
+    const phase = (desktopT * 0.55 + i * 0.41) % 1;
+    const dotX  = p1.x + (p2.x - p1.x) * phase;
+    const dotY  = p1.y + (p2.y - p1.y) * phase;
     const alpha = 0.5 + Math.sin(phase * Math.PI) * 0.5;
-
-    ctx.beginPath();
-    ctx.arc(dotX, dotY, 2.2, 0, Math.PI * 2);
-    if (isGold)         ctx.fillStyle = `rgba(138,106,42,${alpha})`;
-    else if (isCapital) ctx.fillStyle = `rgba(42,79,138,${alpha})`;
-    else                ctx.fillStyle = `rgba(0,0,0,${alpha * 0.3})`;
-    ctx.fill();
+    desktopCtx.beginPath(); desktopCtx.arc(dotX, dotY, 2.2, 0, Math.PI * 2);
+    if (isGold) desktopCtx.fillStyle = `rgba(138,106,42,${alpha})`;
+    else if (isCapital) desktopCtx.fillStyle = `rgba(42,79,138,${alpha})`;
+    else desktopCtx.fillStyle = `rgba(0,0,0,${alpha * 0.3})`;
+    desktopCtx.fill();
   });
-
-  requestAnimationFrame(draw);
+  requestAnimationFrame(drawDesktop);
 }
 
-function resize() {
-  canvas.width  = window.innerWidth;
-  canvas.height = window.innerHeight;
+function resizeDesktopCanvas() {
+  desktopCanvas.width  = window.innerWidth;
+  desktopCanvas.height = window.innerHeight;
+}
+
+// ════════════════════════════════════════════════════════
+//  MOBILE LANDSCAPE — pannable world
+// ════════════════════════════════════════════════════════
+const WORLD_W = 1500;
+const WORLD_H = 960;
+
+const panViewport = document.getElementById('mobile-pan-viewport');
+const panWorld    = document.getElementById('mobile-pan-world');
+const panCanvas   = document.getElementById('mobile-pan-canvas');
+const panCtx      = panCanvas.getContext('2d');
+panCanvas.width   = WORLD_W;
+panCanvas.height  = WORLD_H;
+
+let panX = 0, panY = 0;
+let panT = 0;
+let panAnim = false;
+let dragging = false, lastTX = 0, lastTY = 0;
+let tapStartX = 0, tapStartY = 0, tapMoved = false;
+
+function clampPan(x, y) {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight - 48;
+  return {
+    x: Math.max(Math.min(0, vw - WORLD_W), Math.min(0, x)),
+    y: Math.max(Math.min(0, vh - WORLD_H), Math.min(0, y)),
+  };
+}
+function applyPan() {
+  panWorld.style.transform = `translate(${panX}px, ${panY}px)`;
+}
+
+panViewport.addEventListener('touchstart', e => {
+  if (e.touches.length !== 1) return;
+  e.preventDefault();
+  dragging = true; tapMoved = false;
+  lastTX = tapStartX = e.touches[0].clientX;
+  lastTY = tapStartY = e.touches[0].clientY;
+}, { passive: false });
+
+panViewport.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (!dragging || e.touches.length !== 1) return;
+  const dx = e.touches[0].clientX - lastTX;
+  const dy = e.touches[0].clientY - lastTY;
+  lastTX = e.touches[0].clientX;
+  lastTY = e.touches[0].clientY;
+  if (Math.abs(dx) > 3 || Math.abs(dy) > 3) tapMoved = true;
+  const c = clampPan(panX + dx, panY + dy);
+  panX = c.x; panY = c.y;
+  applyPan();
+}, { passive: false });
+
+panViewport.addEventListener('touchend', e => {
+  dragging = false;
+  if (!tapMoved) {
+    // Treat as tap — find hit node by world coords
+    const wx = tapStartX - panX;
+    const wy = tapStartY - panY;
+    nodes.forEach(n => {
+      const el = document.getElementById(`mob-node-${n.id}`);
+      if (!el) return;
+      const cx = parseFloat(el.style.left);
+      const cy = parseFloat(el.style.top);
+      const hw = el.offsetWidth / 2 + 10;
+      const hh = el.offsetHeight / 2 + 10;
+      if (wx >= cx - hw && wx <= cx + hw && wy >= cy - hh && wy <= cy + hh) {
+        handleClick(n);
+      }
+    });
+  }
+});
+
+// Block pinch-zoom everywhere on mobile
+document.addEventListener('touchmove', e => {
+  if (e.touches.length > 1) e.preventDefault();
+}, { passive: false });
+
+function buildMobilePan() {
+  nodes.forEach(n => {
+    const el = document.getElementById(`node-${n.id}`);
+    if (el && el.parentNode === document.body) el.style.display = 'none';
+  });
+  panWorld.querySelectorAll('.node').forEach(el => el.remove());
+
+  nodes.forEach(n => {
+    const el = document.createElement('div');
+    el.className = `node ${n.cls || ''}`;
+    el.id = `mob-node-${n.id}`;
+    el.style.left = (n.pos[0] / 100) * WORLD_W + 'px';
+    el.style.top  = (n.pos[1] / 100) * WORLD_H + 'px';
+    el.innerHTML  = nodeCardHTML(n);
+    el.addEventListener('click', () => handleClick(n));
+    panWorld.appendChild(el);
+  });
+
+  // Start centered on the graph
+  const vw = window.innerWidth;
+  const vh = window.innerHeight - 48;
+  const c = clampPan((vw - WORLD_W) / 2, (vh - WORLD_H) / 2);
+  panX = c.x; panY = c.y;
+  applyPan();
+  panViewport.style.display = 'block';
+}
+
+function mobileNodeCenter(id) {
+  const el = document.getElementById(`mob-node-${id}`);
+  if (!el) return null;
+  return { x: parseFloat(el.style.left), y: parseFloat(el.style.top) };
+}
+
+function drawMobilePan() {
+  if (!panAnim) return;
+  panCtx.clearRect(0, 0, WORLD_W, WORLD_H);
+  panT += 0.003;
+  edges.forEach(([a, b], i) => {
+    const p1 = mobileNodeCenter(a);
+    const p2 = mobileNodeCenter(b);
+    if (!p1 || !p2) return;
+    const isGold    = a === 'main'    || b === 'main';
+    const isCapital = a === 'capital' || b === 'capital';
+    const grad = panCtx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
+    if (isGold) { grad.addColorStop(0,'rgba(138,106,42,0.5)'); grad.addColorStop(1,'rgba(138,106,42,0.08)'); }
+    else if (isCapital) { grad.addColorStop(0,'rgba(42,79,138,0.42)'); grad.addColorStop(1,'rgba(42,79,138,0.06)'); }
+    else { grad.addColorStop(0,'rgba(0,0,0,0.12)'); grad.addColorStop(1,'rgba(0,0,0,0.03)'); }
+    panCtx.beginPath(); panCtx.moveTo(p1.x,p1.y); panCtx.lineTo(p2.x,p2.y);
+    panCtx.strokeStyle = grad; panCtx.lineWidth = 1.5; panCtx.stroke();
+    const phase = (panT * 0.55 + i * 0.41) % 1;
+    const dotX  = p1.x + (p2.x - p1.x) * phase;
+    const dotY  = p1.y + (p2.y - p1.y) * phase;
+    const alpha = 0.5 + Math.sin(phase * Math.PI) * 0.5;
+    panCtx.beginPath(); panCtx.arc(dotX, dotY, 2.5, 0, Math.PI * 2);
+    if (isGold) panCtx.fillStyle = `rgba(138,106,42,${alpha})`;
+    else if (isCapital) panCtx.fillStyle = `rgba(42,79,138,${alpha})`;
+    else panCtx.fillStyle = `rgba(0,0,0,${alpha * 0.3})`;
+    panCtx.fill();
+  });
+  requestAnimationFrame(drawMobilePan);
 }
 
 // ════════════════════════════════════════════════════════
@@ -638,30 +804,38 @@ function init() {
   const prompt = document.getElementById('rotate-prompt');
 
   if (isPortraitMobile()) {
-    // Show rotate prompt, pause graph
     prompt.style.display = 'flex';
-    animRunning = false;
-  } else {
-    // Hide rotate prompt, run graph
+    panViewport.style.display = 'none';
+    desktopAnim = false; panAnim = false;
+
+  } else if (isLandscapeMobile()) {
     prompt.style.display = 'none';
+    desktopAnim = false;
+    buildMobilePan();
+    if (!panAnim) {
+      panAnim = true;
+      requestAnimationFrame(drawMobilePan);
+    }
+
+  } else {
+    prompt.style.display = 'none';
+    panViewport.style.display = 'none';
+    panAnim = false;
     buildDesktop();
-    animRunning = true;
-    resize();
-    setTimeout(() => requestAnimationFrame(draw), 200);
+    resizeDesktopCanvas();
+    if (!desktopAnim) {
+      desktopAnim = true;
+      setTimeout(() => requestAnimationFrame(drawDesktop), 200);
+    }
   }
 }
 
 let resizeTimer;
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => {
-    resize();
-    init();
-  }, 150);
+  resizeTimer = setTimeout(() => { resizeDesktopCanvas(); init(); }, 150);
 });
 
-window.addEventListener('resize', resize);
-// Only init the graph if already authenticated (password screen calls init() directly)
 if (_isAuthed()) init();
 
 // ════════════════════════════════════════════════════════
