@@ -275,7 +275,8 @@
     width: 1500px;
     height: 960px;
     top: 0; left: 0;
-    /* transform set by JS */
+    transform-origin: top left;
+    /* translate + scale applied by JS */
   }
 
   #mobile-pan-canvas {
@@ -661,8 +662,9 @@ function resizeDesktopCanvas() {
 // ════════════════════════════════════════════════════════
 //  MOBILE LANDSCAPE — pannable world
 // ════════════════════════════════════════════════════════
-const WORLD_W = 1500;
-const WORLD_H = 960;
+const WORLD_W  = 1500;
+const WORLD_H  = 960;
+const MOBILE_SCALE = 0.62; // zoomed-out factor — raise to zoom in, lower to zoom out more
 
 const panViewport = document.getElementById('mobile-pan-viewport');
 const panWorld    = document.getElementById('mobile-pan-world');
@@ -680,13 +682,16 @@ let tapStartX = 0, tapStartY = 0, tapMoved = false;
 function clampPan(x, y) {
   const vw = window.innerWidth;
   const vh = window.innerHeight - 48;
+  // Scaled world dimensions
+  const sw = WORLD_W * MOBILE_SCALE;
+  const sh = WORLD_H * MOBILE_SCALE;
   return {
-    x: Math.max(Math.min(0, vw - WORLD_W), Math.min(0, x)),
-    y: Math.max(Math.min(0, vh - WORLD_H), Math.min(0, y)),
+    x: Math.max(Math.min(0, vw - sw), Math.min(0, x)),
+    y: Math.max(Math.min(0, vh - sh), Math.min(0, y)),
   };
 }
 function applyPan() {
-  panWorld.style.transform = `translate(${panX}px, ${panY}px)`;
+  panWorld.style.transform = `translate(${panX}px, ${panY}px) scale(${MOBILE_SCALE})`;
 }
 
 panViewport.addEventListener('touchstart', e => {
@@ -713,9 +718,9 @@ panViewport.addEventListener('touchmove', e => {
 panViewport.addEventListener('touchend', e => {
   dragging = false;
   if (!tapMoved) {
-    // Treat as tap — find hit node by world coords
-    const wx = tapStartX - panX;
-    const wy = tapStartY - panY;
+    // Convert screen tap coords to world coords (undo pan + scale)
+    const wx = (tapStartX - panX) / MOBILE_SCALE;
+    const wy = (tapStartY - panY) / MOBILE_SCALE;
     nodes.forEach(n => {
       const el = document.getElementById(`mob-node-${n.id}`);
       if (!el) return;
@@ -753,10 +758,10 @@ function buildMobilePan() {
     panWorld.appendChild(el);
   });
 
-  // Start centered on the graph
+  // Start centered — account for scale so the graph sits in the middle of the viewport
   const vw = window.innerWidth;
   const vh = window.innerHeight - 48;
-  const c = clampPan((vw - WORLD_W) / 2, (vh - WORLD_H) / 2);
+  const c = clampPan((vw - WORLD_W * MOBILE_SCALE) / 2, (vh - WORLD_H * MOBILE_SCALE) / 2);
   panX = c.x; panY = c.y;
   applyPan();
   panViewport.style.display = 'block';
