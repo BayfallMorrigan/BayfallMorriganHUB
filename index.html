@@ -4,77 +4,107 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Firm Hub</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #080a0e;
-    --bg2: #0d1117;
-    --surface: rgba(255,255,255,0.04);
-    --border: rgba(255,255,255,0.08);
-    --gold: #c9a84c;
-    --gold-dim: rgba(201,168,76,0.15);
-    --gold-glow: rgba(201,168,76,0.35);
-    --white: #e8e6e1;
-    --muted: rgba(232,230,225,0.45);
-    --live: #3ddc84;
-    --offline: #555;
-    --accent: #4a8fff;
-    --accent-dim: rgba(74,143,255,0.12);
+    --bg: #f9f8f6;
+    --bg2: #f2f0ec;
+    --surface: rgba(0,0,0,0.03);
+    --border: #ccc9c2;
+    --border-mid: #b5b2aa;
+    --black: #080808;
+    --mid: #7a7670;
+    --rule: #ccc9c2;
+
+    --gold: #8a6a2a;
+    --gold-dim: rgba(138,106,42,0.1);
+    --gold-glow: rgba(138,106,42,0.22);
+    --gold-line: rgba(138,106,42,0.4);
+
+    --accent: #2a4f8a;
+    --accent-dim: rgba(42,79,138,0.08);
+    --accent-line: rgba(42,79,138,0.35);
+
+    --live: #3d7a50;
+    --offline: #aaa8a3;
+    --amber: #8a5e2a;
+
+    --display: 'Cormorant Garamond', Georgia, serif;
+    --body: 'EB Garamond', Georgia, serif;
   }
 
   html, body {
     width: 100%; height: 100%;
     background: var(--bg);
-    font-family: 'DM Mono', monospace;
-    color: var(--white);
+    font-family: var(--body);
+    color: var(--black);
     overflow: hidden;
     cursor: default;
+    -webkit-font-smoothing: antialiased;
   }
 
   header {
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;
     display: flex; align-items: center; justify-content: space-between;
-    padding: 20px 36px;
-    border-bottom: 1px solid var(--border);
-    background: linear-gradient(180deg, rgba(8,10,14,0.97) 0%, transparent 100%);
-    backdrop-filter: blur(8px);
+    padding: 0 52px;
+    height: 72px;
+    border-bottom: 1px solid var(--rule);
+    background: var(--bg);
   }
   .logo {
-    font-family: 'DM Serif Display', serif;
-    font-size: 1.1rem;
-    color: var(--gold);
-    letter-spacing: 0.04em;
+    font-family: var(--display);
+    font-size: 1.15rem;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    color: var(--black);
   }
   .logo span {
-    color: var(--muted); font-size: 0.7rem;
-    font-family: 'DM Mono', monospace; margin-left: 12px;
+    font-family: var(--body);
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--mid);
+    margin-left: 14px;
   }
   .header-right {
-    display: flex; align-items: center; gap: 20px;
-    font-size: 0.65rem; color: var(--muted);
-    letter-spacing: 0.1em; text-transform: uppercase;
+    display: flex; align-items: center; gap: 28px;
+    font-family: var(--body);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--mid);
   }
   .live-badge {
-    display: flex; align-items: center; gap: 6px;
+    display: flex; align-items: center; gap: 7px;
   }
   .live-badge::before {
     content: '';
-    width: 6px; height: 6px; border-radius: 50%;
+    width: 5px; height: 5px; border-radius: 50%;
     background: var(--live);
-    box-shadow: 0 0 8px var(--live);
-    animation: blink 2s infinite;
+    animation: blink 2.5s infinite;
   }
   @keyframes blink {
     0%,100% { opacity: 1; }
-    50% { opacity: 0.35; }
+    50% { opacity: 0.25; }
   }
 
   #canvas {
     position: fixed; inset: 0;
     width: 100%; height: 100%;
     pointer-events: none;
+  }
+
+  /* subtle grid texture */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,0,0,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,0.025) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none; z-index: 0;
   }
 
   .node {
@@ -87,113 +117,244 @@
     position: relative;
     padding: 14px 18px;
     border: 1px solid var(--border);
-    border-radius: 4px;
-    background: rgba(8,10,14,0.94);
-    backdrop-filter: blur(16px);
-    min-width: 145px;
-    transition: border-color 0.25s, box-shadow 0.25s, transform 0.2s;
+    border-radius: 2px;
+    background: var(--bg);
+    min-width: 148px;
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.18s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
   }
   .node:hover .node-card {
-    transform: scale(1.04);
-    border-color: rgba(255,255,255,0.18);
+    transform: scale(1.035);
+    border-color: var(--border-mid);
+    box-shadow: 0 4px 18px rgba(0,0,0,0.1);
   }
 
+  /* Main node */
   .node.main .node-card {
     border-color: var(--gold);
-    min-width: 185px;
+    min-width: 190px;
     padding: 18px 22px;
-    box-shadow: 0 0 28px var(--gold-dim), 0 0 60px rgba(201,168,76,0.07);
+    box-shadow: 0 2px 12px var(--gold-dim);
   }
   .node.main:hover .node-card {
-    box-shadow: 0 0 44px var(--gold-glow), 0 0 90px rgba(201,168,76,0.14);
+    box-shadow: 0 4px 24px var(--gold-glow);
   }
 
+  /* Capital node */
   .node.capital .node-card {
     border-color: var(--accent);
-    min-width: 165px;
-    box-shadow: 0 0 22px var(--accent-dim), 0 0 48px rgba(74,143,255,0.05);
+    min-width: 168px;
+    box-shadow: 0 2px 12px var(--accent-dim);
   }
   .node.capital:hover .node-card {
-    box-shadow: 0 0 36px rgba(74,143,255,0.28), 0 0 70px rgba(74,143,255,0.1);
+    box-shadow: 0 4px 22px rgba(42,79,138,0.16);
   }
+
+  /* Python tool node */
+  .node.python-tool .node-card {
+    border-color: rgba(138,94,42,0.45);
+    box-shadow: 0 1px 6px rgba(138,94,42,0.06);
+  }
+  .node.python-tool:hover .node-card {
+    border-color: rgba(138,94,42,0.75);
+    box-shadow: 0 4px 16px rgba(138,94,42,0.14);
+  }
+  .node.python-tool .node-label { color: var(--amber); }
 
   .badge {
     position: absolute; top: -9px; right: 12px;
-    font-size: 0.52rem; letter-spacing: 0.12em; text-transform: uppercase;
+    font-family: var(--body);
+    font-size: 0.5rem; letter-spacing: 0.14em; text-transform: uppercase;
     color: var(--bg); background: var(--accent);
-    padding: 2px 7px; border-radius: 2px;
-    font-weight: 500;
+    padding: 2px 7px; border-radius: 1px;
   }
 
   .node-label {
-    font-family: 'DM Serif Display', serif;
-    font-size: 0.95rem;
-    color: var(--white);
+    font-family: var(--display);
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--black);
     margin-bottom: 4px;
     line-height: 1.2;
   }
-  .node.main .node-label { font-size: 1.15rem; color: var(--gold); }
-  .node.capital .node-label { color: #80b8ff; }
+  .node.main .node-label {
+    font-size: 1.2rem;
+    color: var(--gold);
+    font-style: italic;
+  }
+  .node.capital .node-label { color: var(--accent); }
 
   .node-desc {
-    font-size: 0.6rem; color: var(--muted);
-    letter-spacing: 0.03em; line-height: 1.5;
+    font-family: var(--body);
+    font-size: 0.62rem;
+    color: var(--mid);
+    letter-spacing: 0.02em;
+    line-height: 1.5;
     margin-bottom: 10px;
   }
 
   .node-footer {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 8px;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
   }
 
   .status {
     display: flex; align-items: center; gap: 5px;
-    font-size: 0.56rem; letter-spacing: 0.08em; text-transform: uppercase;
+    font-family: var(--body);
+    font-size: 0.56rem; letter-spacing: 0.1em; text-transform: uppercase;
   }
   .status-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
   .status.live { color: var(--live); }
-  .status.live .status-dot { background: var(--live); box-shadow: 0 0 5px var(--live); }
+  .status.live .status-dot { background: var(--live); }
   .status.offline { color: var(--offline); }
   .status.offline .status-dot { background: var(--offline); }
-  .status.download { color: #f0a050; }
-  .status.download .status-dot { background: #f0a050; box-shadow: 0 0 5px #f0a050; }
-
-  .node.python-tool .node-card {
-    border-color: rgba(240,160,80,0.4);
-    box-shadow: 0 0 20px rgba(240,160,80,0.08);
-  }
-  .node.python-tool:hover .node-card {
-    border-color: rgba(240,160,80,0.7);
-    box-shadow: 0 0 32px rgba(240,160,80,0.2);
-  }
-  .node.python-tool .node-label { color: #f0b070; }
+  .status.download { color: var(--amber); }
+  .status.download .status-dot { background: var(--amber); }
 
   .node-type {
-    font-size: 0.53rem; letter-spacing: 0.09em; text-transform: uppercase;
-    color: rgba(255,255,255,0.18);
+    font-family: var(--body);
+    font-size: 0.53rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: rgba(0,0,0,0.2);
   }
 
   .open-hint {
-    position: absolute; bottom: -24px; left: 50%;
+    position: absolute; bottom: -22px; left: 50%;
     transform: translateX(-50%);
-    font-size: 0.54rem; letter-spacing: 0.1em; text-transform: uppercase;
-    color: rgba(255,255,255,0.22); white-space: nowrap;
+    font-family: var(--body);
+    font-size: 0.52rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--mid); white-space: nowrap;
     opacity: 0; transition: opacity 0.2s; pointer-events: none;
   }
   .node:hover .open-hint { opacity: 1; }
 
-  body::after {
-    content: '';
-    position: fixed; inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.028'/%3E%3C/svg%3E");
-    pointer-events: none; z-index: 50;
+  /* ────────────────────────────────────────────
+     MOBILE STYLES
+  ──────────────────────────────────────────── */
+  @media (max-width: 768px) {
+    html, body {
+      overflow: auto;
+      height: auto;
+      min-height: 100%;
+    }
+
+    /* hide canvas on mobile — no room for graph */
+    #canvas { display: none; }
+    body::before { display: none; }
+
+    header {
+      position: sticky;
+      padding: 0 20px;
+      height: 60px;
+    }
+    .logo { font-size: 1rem; }
+    .logo span { display: none; }
+    .header-right { gap: 14px; font-size: 0.6rem; }
+
+    /* Unfix all nodes — stack them in a scrollable list */
+    .node {
+      position: static !important;
+      transform: none !important;
+      width: 100%;
+      left: auto !important;
+      top: auto !important;
+    }
+
+    /* Mobile layout wrapper — injected by JS below */
+    #mobile-grid {
+      padding: 20px 16px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .mobile-section-label {
+      font-family: var(--body);
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--mid);
+      padding: 20px 4px 8px;
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 2px;
+    }
+
+    .node-card {
+      border-radius: 0;
+      border-left: none;
+      border-right: none;
+      border-top: none;
+      border-bottom: 1px solid var(--rule);
+      box-shadow: none !important;
+      min-width: 0 !important;
+      width: 100%;
+      padding: 14px 4px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: transparent;
+    }
+    .node:hover .node-card {
+      transform: none;
+      background: var(--bg2);
+    }
+    .node:active .node-card {
+      background: rgba(0,0,0,0.04);
+    }
+
+    /* left accent line replaces card border */
+    .node.main .node-card    { border-bottom: 1px solid var(--rule); border-left: 2px solid var(--gold) !important; padding-left: 12px; }
+    .node.capital .node-card { border-bottom: 1px solid var(--rule); border-left: 2px solid var(--accent) !important; padding-left: 12px; }
+    .node.python-tool .node-card { border-bottom: 1px solid var(--rule); border-left: 2px solid rgba(138,94,42,0.5) !important; padding-left: 12px; }
+
+    .node-card-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .node-label {
+      font-size: 1rem;
+      margin-bottom: 2px;
+    }
+    .node.main .node-label { font-size: 1.05rem; }
+
+    .node-desc {
+      font-size: 0.65rem;
+      margin-bottom: 6px;
+    }
+
+    .node-footer {
+      justify-content: flex-start;
+      gap: 14px;
+    }
+
+    .node-type { font-size: 0.52rem; }
+
+    /* arrow indicator replaces open-hint */
+    .open-hint { display: none; }
+    .mobile-arrow {
+      font-size: 1rem;
+      color: var(--mid);
+      opacity: 0.5;
+      flex-shrink: 0;
+    }
+
+    .badge {
+      position: static;
+      display: inline-block;
+      margin-bottom: 4px;
+      font-size: 0.48rem;
+    }
+  }
+
+  @media (max-width: 380px) {
+    .node-label { font-size: 0.9rem; }
+    .node-desc { font-size: 0.6rem; }
   }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">Firm Hub <span>/ internal tools</span></div>
+  <div class="logo">Bayfall Morrigan <span>/ internal tools</span></div>
   <div class="header-right">
     <div class="live-badge" id="liveCount">— live</div>
     <div id="clock"></div>
@@ -202,10 +363,88 @@
 
 <canvas id="canvas"></canvas>
 
+<!-- PASSWORD OVERLAY -->
+<div id="pw-overlay" style="position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;">
+  <div style="position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(0,0,0,0.022) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,0.022) 1px,transparent 1px);background-size:52px 52px;"></div>
+  <div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;width:100%;max-width:320px;padding:0 24px;">
+    <div style="font-family:var(--body);font-size:0.58rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--mid);margin-bottom:18px;text-align:center;">Internal Access</div>
+    <div style="font-family:var(--display);font-size:2rem;font-weight:300;font-style:italic;color:var(--black);margin-bottom:6px;text-align:center;line-height:1.1;">Firm Hub</div>
+    <div style="font-family:var(--body);font-size:0.78rem;color:var(--mid);margin-bottom:36px;text-align:center;">Restricted access. Authorised personnel only.</div>
+    <div style="width:40px;height:1px;background:var(--rule);margin-bottom:36px;"></div>
+    <input id="pw-input" type="password" placeholder="Password" autocomplete="off"
+      style="font-family:var(--body);font-size:1rem;color:var(--black);background:transparent;border:none;border-bottom:1px solid #b5b2aa;padding:6px 0;outline:none;width:100%;text-align:center;letter-spacing:0.1em;margin-bottom:20px;"
+      onkeydown="if(event.key==='Enter')_checkPW()">
+    <button onclick="_checkPW()"
+      style="font-family:var(--body);font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:#f9f8f6;background:#080808;border:1px solid #080808;padding:11px 36px;cursor:pointer;border-radius:1px;width:100%;margin-bottom:12px;">
+      Unlock
+    </button>
+    <div id="pw-error" style="font-family:var(--body);font-size:0.6rem;letter-spacing:0.1em;color:#8a2a2a;height:16px;text-align:center;"></div>
+  </div>
+</div>
+
 <script>
 // ════════════════════════════════════════════════════════
-//  NODES — update labels, URLs, positions, and status here
-//  pos: [x%, y%] of the viewport
+//  SECURITY — SHA-256 hashed password, lockout, hardened session
+// ════════════════════════════════════════════════════════
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('keydown', e => {
+  if (e.key === 'F12') e.preventDefault();
+  if (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key)) e.preventDefault();
+  if (e.ctrlKey && e.key === 'U') e.preventDefault();
+});
+
+const _PH  = '9cd0d30d5bc77e21b8d0c808ca8cdfa8b2ef3ea51c9ee942e0463260c03a3946';
+const _SK  = 'hub_e392aff8326a08ebc7b3b3e68787dd69';
+const _LK  = 'hub_lock';
+const _FA  = 'hub_fails';
+const _MAX = 5;
+const _LMS = 5 * 60 * 1000;
+
+async function _hash(s) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+function _genToken() {
+  const a = new Uint8Array(32); crypto.getRandomValues(a);
+  return Array.from(a).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+function _isLocked()    { return Date.now() < parseInt(sessionStorage.getItem(_LK)||'0'); }
+function _remaining()   { return Math.max(0, Math.ceil((parseInt(sessionStorage.getItem(_LK)||'0') - Date.now()) / 1000)); }
+function _isAuthed()    { const t = sessionStorage.getItem(_SK); return t && /^[0-9a-f]{64}$/.test(t); }
+function _setAuthed()   { sessionStorage.setItem(_SK, _genToken()); sessionStorage.removeItem(_LK); sessionStorage.removeItem(_FA); }
+
+async function _checkPW() {
+  if (_isLocked()) {
+    document.getElementById('pw-error').textContent = `Too many attempts. Wait ${_remaining()}s.`;
+    return;
+  }
+  const input = document.getElementById('pw-input').value;
+  document.getElementById('pw-input').value = '';
+  const h = await _hash(input);
+  if (h === _PH) {
+    _setAuthed();
+    document.getElementById('pw-overlay').style.display = 'none';
+    init();
+  } else {
+    const f = parseInt(sessionStorage.getItem(_FA)||'0') + 1;
+    sessionStorage.setItem(_FA, f);
+    if (f >= _MAX) {
+      sessionStorage.setItem(_LK, Date.now() + _LMS);
+      document.getElementById('pw-error').textContent = 'Too many attempts. Locked for 5 minutes.';
+    } else {
+      document.getElementById('pw-error').textContent = `Incorrect. ${_MAX - f} attempt${_MAX - f !== 1 ? 's' : ''} remaining.`;
+    }
+    document.getElementById('pw-input').focus();
+  }
+}
+
+// Skip lock screen if already authenticated this session
+if (_isAuthed()) {
+  document.getElementById('pw-overlay').style.display = 'none';
+}
+
+// ════════════════════════════════════════════════════════
+//  NODES
 // ════════════════════════════════════════════════════════
 const nodes = [
   {
@@ -217,6 +456,7 @@ const nodes = [
     url: 'https://www.bayfallmorrigan.com/',
     cls: 'main',
     pos: [50, 19],
+    group: 'core',
   },
   {
     id: 'capital',
@@ -228,6 +468,7 @@ const nodes = [
     cls: 'capital',
     pos: [50, 50],
     badge: 'Protected',
+    group: 'core',
   },
   {
     id: 'montecarlo',
@@ -238,6 +479,7 @@ const nodes = [
     url: 'https://bayfallmorrigan.github.io/Monte-Carlo-/',
     cls: '',
     pos: [70, 48],
+    group: 'tools',
   },
   {
     id: 'accsim1',
@@ -248,6 +490,7 @@ const nodes = [
     url: 'https://bayfallmorrigan.github.io/Standard-Account-Simulator/',
     cls: '',
     pos: [67, 64],
+    group: 'tools',
   },
   {
     id: 'accsim2',
@@ -258,6 +501,7 @@ const nodes = [
     url: 'https://bayfallmorrigan.github.io/Account-Build-Up-Simulator/',
     cls: '',
     pos: [67, 79],
+    group: 'tools',
   },
   {
     id: 'abuyield',
@@ -268,6 +512,7 @@ const nodes = [
     url: 'https://bayfallmorrigan.github.io/ABU-YIELD-CALCULATOR/',
     cls: '',
     pos: [67, 92],
+    group: 'tools',
   },
   {
     id: 'dailymover',
@@ -279,6 +524,7 @@ const nodes = [
     download: 'https://github.com/BayfallMorrigan/pythontools/raw/main/daily-mover-scanner.zip',
     cls: 'python-tool',
     pos: [30, 50],
+    group: 'python',
   },
   {
     id: 'backtest',
@@ -290,12 +536,10 @@ const nodes = [
     download: 'https://github.com/BayfallMorrigan/pythontools/raw/main/backtest-scanner.zip',
     cls: 'python-tool',
     pos: [30, 65],
+    group: 'python',
   },
 ];
 
-// ════════════════════════════════════════════════════════
-//  EDGES — pairs of node ids to draw connecting lines
-// ════════════════════════════════════════════════════════
 const edges = [
   ['main', 'capital'],
   ['main', 'accsim1'],
@@ -309,52 +553,128 @@ const edges = [
   ['capital', 'backtest'],
 ];
 
-// ════════════════════════════════════════════════════════
-//  Build DOM
-// ════════════════════════════════════════════════════════
-nodes.forEach(n => {
-  const el = document.createElement('div');
-  el.className = `node ${n.cls || ''}`;
-  el.id = `node-${n.id}`;
-  el.style.left = n.pos[0] + 'vw';
-  el.style.top  = n.pos[1] + 'vh';
+const isMobile = () => window.innerWidth <= 768;
 
-  el.innerHTML = `
-    <div class="node-card">
-      ${n.badge ? `<div class="badge">${n.badge}</div>` : ''}
-      <div class="node-label">${n.label}</div>
-      <div class="node-desc">${n.desc}</div>
-      <div class="node-footer">
-        <div class="status ${n.status}">
-          <div class="status-dot"></div>${n.status}
-        </div>
-        <div class="node-type">${n.type}</div>
-      </div>
-    </div>
-    <div class="open-hint">${n.download ? '↓ download zip' : '↗ open'}</div>
-  `;
+// ════════════════════════════════════════════════════════
+//  Build DOM — desktop fixed positions
+// ════════════════════════════════════════════════════════
+function buildDesktop() {
+  // Remove mobile grid if present
+  const mg = document.getElementById('mobile-grid');
+  if (mg) mg.remove();
 
-  el.addEventListener('click', () => {
-    if (n.download) {
-      const a = document.createElement('a');
-      a.href = n.download;
-      a.download = '';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    } else if (n.url) {
-      window.open(n.url, '_blank');
+  nodes.forEach(n => {
+    let el = document.getElementById(`node-${n.id}`);
+    if (!el) {
+      el = document.createElement('div');
+      el.className = `node ${n.cls || ''}`;
+      el.id = `node-${n.id}`;
     }
+    el.style.left = n.pos[0] + 'vw';
+    el.style.top  = n.pos[1] + 'vh';
+    el.style.position = 'fixed';
+
+    el.innerHTML = `
+      <div class="node-card">
+        ${n.badge ? `<div class="badge">${n.badge}</div>` : ''}
+        <div class="node-label">${n.label}</div>
+        <div class="node-desc">${n.desc}</div>
+        <div class="node-footer">
+          <div class="status ${n.status}">
+            <div class="status-dot"></div>${n.status}
+          </div>
+          <div class="node-type">${n.type}</div>
+        </div>
+      </div>
+      <div class="open-hint">${n.download ? '↓ download zip' : '↗ open'}</div>
+    `;
+
+    el.addEventListener('click', () => handleClick(n));
+    document.body.appendChild(el);
   });
-  document.body.appendChild(el);
-});
+}
 
 // ════════════════════════════════════════════════════════
-//  Canvas edges with animated traveling dots
+//  Build DOM — mobile scrollable list
 // ════════════════════════════════════════════════════════
-const canvas  = document.getElementById('canvas');
-const ctx     = canvas.getContext('2d');
+function buildMobile() {
+  // Remove desktop nodes
+  nodes.forEach(n => {
+    const el = document.getElementById(`node-${n.id}`);
+    if (el) el.remove();
+  });
+
+  let grid = document.getElementById('mobile-grid');
+  if (!grid) {
+    grid = document.createElement('div');
+    grid.id = 'mobile-grid';
+    document.body.appendChild(grid);
+  }
+  grid.innerHTML = '';
+
+  const groups = [
+    { key: 'core',   label: 'Core' },
+    { key: 'tools',  label: 'Analytical Tools' },
+    { key: 'python', label: 'Python Tools — Local' },
+  ];
+
+  groups.forEach(g => {
+    const groupNodes = nodes.filter(n => n.group === g.key);
+    if (!groupNodes.length) return;
+
+    const sectionLabel = document.createElement('div');
+    sectionLabel.className = 'mobile-section-label';
+    sectionLabel.textContent = g.label;
+    grid.appendChild(sectionLabel);
+
+    groupNodes.forEach(n => {
+      const el = document.createElement('div');
+      el.className = `node ${n.cls || ''}`;
+      el.id = `node-${n.id}`;
+
+      el.innerHTML = `
+        <div class="node-card">
+          <div class="node-card-body">
+            ${n.badge ? `<div class="badge">${n.badge}</div>` : ''}
+            <div class="node-label">${n.label}</div>
+            <div class="node-desc">${n.desc}</div>
+            <div class="node-footer">
+              <div class="status ${n.status}">
+                <div class="status-dot"></div>${n.status}
+              </div>
+              <div class="node-type">${n.type}</div>
+            </div>
+          </div>
+          <div class="mobile-arrow">${n.download ? '↓' : '↗'}</div>
+        </div>
+      `;
+
+      el.addEventListener('click', () => handleClick(n));
+      grid.appendChild(el);
+    });
+  });
+}
+
+function handleClick(n) {
+  if (n.download) {
+    const a = document.createElement('a');
+    a.href = n.download;
+    a.download = '';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } else if (n.url) {
+    window.open(n.url, '_blank');
+  }
+}
+
+// ════════════════════════════════════════════════════════
+//  Canvas edges — desktop only
+// ════════════════════════════════════════════════════════
+const canvas = document.getElementById('canvas');
+const ctx    = canvas.getContext('2d');
 let t = 0;
+let animRunning = false;
 
 function nodeCenter(id) {
   const el = document.getElementById(`node-${id}`);
@@ -364,8 +684,9 @@ function nodeCenter(id) {
 }
 
 function draw() {
+  if (!animRunning || isMobile()) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  t += 0.0035;
+  t += 0.003;
 
   edges.forEach(([a, b], i) => {
     const p1 = nodeCenter(a);
@@ -375,17 +696,16 @@ function draw() {
     const isGold    = a === 'main'    || b === 'main';
     const isCapital = a === 'capital' || b === 'capital';
 
-    // Line gradient
     const grad = ctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
     if (isGold) {
-      grad.addColorStop(0, 'rgba(201,168,76,0.55)');
-      grad.addColorStop(1, 'rgba(201,168,76,0.1)');
+      grad.addColorStop(0, 'rgba(138,106,42,0.5)');
+      grad.addColorStop(1, 'rgba(138,106,42,0.08)');
     } else if (isCapital) {
-      grad.addColorStop(0, 'rgba(74,143,255,0.45)');
-      grad.addColorStop(1, 'rgba(74,143,255,0.07)');
+      grad.addColorStop(0, 'rgba(42,79,138,0.42)');
+      grad.addColorStop(1, 'rgba(42,79,138,0.06)');
     } else {
-      grad.addColorStop(0, 'rgba(255,255,255,0.1)');
-      grad.addColorStop(1, 'rgba(255,255,255,0.03)');
+      grad.addColorStop(0, 'rgba(0,0,0,0.12)');
+      grad.addColorStop(1, 'rgba(0,0,0,0.03)');
     }
 
     ctx.beginPath();
@@ -396,16 +716,16 @@ function draw() {
     ctx.stroke();
 
     // Traveling dot
-    const phase = (t * 0.6 + i * 0.41) % 1;
+    const phase = (t * 0.55 + i * 0.41) % 1;
     const dotX = p1.x + (p2.x - p1.x) * phase;
     const dotY = p1.y + (p2.y - p1.y) * phase;
-    const alpha = 0.55 + Math.sin(phase * Math.PI) * 0.45;
+    const alpha = 0.5 + Math.sin(phase * Math.PI) * 0.5;
 
     ctx.beginPath();
-    ctx.arc(dotX, dotY, 2.5, 0, Math.PI * 2);
-    if (isGold)         ctx.fillStyle = `rgba(201,168,76,${alpha})`;
-    else if (isCapital) ctx.fillStyle = `rgba(74,143,255,${alpha})`;
-    else                ctx.fillStyle = `rgba(255,255,255,${alpha * 0.5})`;
+    ctx.arc(dotX, dotY, 2.2, 0, Math.PI * 2);
+    if (isGold)         ctx.fillStyle = `rgba(138,106,42,${alpha})`;
+    else if (isCapital) ctx.fillStyle = `rgba(42,79,138,${alpha})`;
+    else                ctx.fillStyle = `rgba(0,0,0,${alpha * 0.3})`;
     ctx.fill();
   });
 
@@ -416,11 +736,34 @@ function resize() {
   canvas.width  = window.innerWidth;
   canvas.height = window.innerHeight;
 }
-window.addEventListener('resize', resize);
-resize();
 
-// Wait for layout before first draw
-setTimeout(() => requestAnimationFrame(draw), 200);
+// ════════════════════════════════════════════════════════
+//  Responsive init
+// ════════════════════════════════════════════════════════
+function init() {
+  if (isMobile()) {
+    animRunning = false;
+    buildMobile();
+  } else {
+    buildDesktop();
+    animRunning = true;
+    resize();
+    setTimeout(() => requestAnimationFrame(draw), 200);
+  }
+}
+
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    resize();
+    init();
+  }, 150);
+});
+
+window.addEventListener('resize', resize);
+// Only init the graph if already authenticated (password screen calls init() directly)
+if (_isAuthed()) init();
 
 // ════════════════════════════════════════════════════════
 //  Clock + live count
