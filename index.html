@@ -161,6 +161,66 @@
   }
   .node.python-tool .node-label { color: var(--amber); }
 
+  /* Docs node */
+  .node.docs .node-card {
+    border-color: rgba(42,106,42,0.45);
+    min-width: 210px;
+    box-shadow: 0 1px 6px rgba(42,106,42,0.06);
+  }
+  .node.docs:hover .node-card {
+    border-color: rgba(42,106,42,0.75);
+    box-shadow: 0 4px 16px rgba(42,106,42,0.14);
+  }
+  .node.docs .node-label { color: #2a5c2a; }
+
+  .doc-list {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .doc-group-label {
+    font-family: var(--body);
+    font-size: 0.48rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--mid);
+    padding: 7px 0 4px;
+    opacity: 0.7;
+  }
+
+  .doc-item {
+    display: block;
+    font-family: var(--body);
+    font-size: 0.6rem;
+    color: var(--black);
+    text-decoration: none;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    line-height: 1.35;
+    transition: color 0.15s;
+    cursor: pointer;
+  }
+  .doc-item:last-child { border-bottom: none; }
+  .doc-item:hover { color: #2a5c2a; }
+
+  .doc-item-sub {
+    font-size: 0.5rem;
+    color: var(--mid);
+    display: block;
+    margin-top: 1px;
+  }
+
+  .doc-item-tag {
+    font-size: 0.45rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(0,0,0,0.25);
+    margin-left: 5px;
+  }
+
   .badge {
     position: absolute; top: -9px; right: 12px;
     font-family: var(--body);
@@ -231,7 +291,7 @@
      MOBILE — landscape: show the full graph, scaled down
   ──────────────────────────────────────────── */
 
-  /* Portrait mobile — show pan viewport just like landscape */
+  /* Portrait mobile — list view */
   @media (max-width: 900px) and (orientation: portrait) {
     header { padding: 0 20px; height: 48px; }
     .logo { font-size: 0.95rem; }
@@ -239,70 +299,189 @@
     .header-right { font-size: 0.56rem; gap: 16px; }
     body > .node, #canvas { display: none !important; }
     body::before { display: none !important; }
+    html, body { overflow: auto !important; }
   }
 
-  /* ── Mobile landscape: pannable infinite canvas ── */
-  #mobile-pan-viewport {
-    display: none; /* shown by JS on all mobile */
-    position: fixed;
-    top: 48px; left: 0; right: 0; bottom: 0;
-    overflow: hidden;
-    touch-action: none;
-    cursor: grab;
-    z-index: 5;
-  }
-  #mobile-pan-viewport:active { cursor: grabbing; }
-
-  #mobile-pan-world {
-    position: absolute;
-    width: 1500px;
-    height: 960px;
-    top: 0; left: 0;
-    /* transform set by JS */
-  }
-
-  #mobile-pan-canvas {
-    position: absolute;
-    inset: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-  }
-
-  /* nodes inside the pan world are absolute, not fixed */
-  #mobile-pan-world .node {
-    position: absolute !important;
-    transform: translate(-50%, -50%) !important;
-    cursor: pointer;
-    z-index: 10;
-  }
-
-  /* Compact node sizes for mobile */
-  #mobile-pan-world .node-card {
-    padding: 9px 13px;
-    min-width: 118px !important;
-    font-size: 0.9rem;
-  }
-  #mobile-pan-world .node.main .node-card  { min-width: 150px !important; padding: 12px 16px; }
-  #mobile-pan-world .node.capital .node-card { min-width: 132px !important; }
-  #mobile-pan-world .node-label { font-size: 0.82rem; margin-bottom: 2px; }
-  #mobile-pan-world .node.main .node-label { font-size: 0.95rem; }
-  #mobile-pan-world .node-desc { font-size: 0.54rem; margin-bottom: 7px; line-height: 1.4; }
-  #mobile-pan-world .node-footer { gap: 6px; }
-  #mobile-pan-world .status { font-size: 0.5rem; }
-  #mobile-pan-world .status-dot { width: 4px; height: 4px; }
-  #mobile-pan-world .node-type { font-size: 0.46rem; }
-  #mobile-pan-world .badge { font-size: 0.44rem; padding: 1px 5px; top: -7px; right: 8px; }
-  #mobile-pan-world .open-hint { display: none; }
-
-  /* mobile header strip */
+  /* Mobile landscape */
   @media (max-height: 500px) and (orientation: landscape) {
     header { padding: 0 20px; height: 48px; }
     .logo { font-size: 0.95rem; }
     .logo span { display: none; }
     .header-right { font-size: 0.56rem; gap: 16px; }
-    /* hide the fixed desktop nodes & canvas — mobile uses pan world */
     body > .node, #canvas { display: none !important; }
     body::before { display: none !important; }
+    html, body { overflow: auto !important; }
+  }
+
+  /* ── Mobile list view ── */
+  #mobile-list {
+    display: none;
+    padding: 56px 0 40px;
+    min-height: 100vh;
+  }
+
+  .mob-section {
+    padding: 0 20px;
+    margin-bottom: 8px;
+  }
+
+  .mob-section-label {
+    font-family: var(--body);
+    font-size: 0.58rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--mid);
+    padding: 20px 0 10px;
+    border-top: 1px solid var(--border);
+  }
+
+  .mob-row {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mob-row:active { background: rgba(0,0,0,0.02); }
+
+  .mob-row.main-row  { border-color: var(--gold); }
+  .mob-row.capital-row { border-color: var(--accent); }
+  .mob-row.docs-row  { border-color: rgba(42,106,42,0.45); }
+  .mob-row.contract-row { border-color: rgba(138,94,42,0.4); }
+
+  .mob-accent-bar {
+    width: 3px;
+    flex-shrink: 0;
+    background: var(--border);
+  }
+  .mob-row.main-row .mob-accent-bar     { background: var(--gold); }
+  .mob-row.capital-row .mob-accent-bar  { background: var(--accent); }
+  .mob-row.docs-row .mob-accent-bar     { background: rgba(42,106,42,0.6); }
+  .mob-row.contract-row .mob-accent-bar { background: rgba(138,94,42,0.6); }
+
+  .mob-row-body {
+    padding: 14px 16px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .mob-row-title {
+    font-family: var(--display);
+    font-size: 1.05rem;
+    font-weight: 400;
+    color: var(--black);
+    line-height: 1.2;
+    margin-bottom: 3px;
+  }
+  .mob-row.main-row .mob-row-title   { color: var(--gold); font-style: italic; }
+  .mob-row.capital-row .mob-row-title { color: var(--accent); }
+  .mob-row.docs-row .mob-row-title    { color: #2a5c2a; }
+
+  .mob-row-desc {
+    font-family: var(--body);
+    font-size: 0.68rem;
+    color: var(--mid);
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+
+  .mob-row-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .mob-status {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--body);
+    font-size: 0.56rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .mob-status-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .mob-status.live   { color: var(--live); }
+  .mob-status.live .mob-status-dot { background: var(--live); }
+  .mob-status.download { color: var(--amber); }
+  .mob-status.download .mob-status-dot { background: var(--amber); }
+
+  .mob-row-type {
+    font-family: var(--body);
+    font-size: 0.52rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(0,0,0,0.2);
+  }
+
+  .mob-arrow {
+    display: flex;
+    align-items: center;
+    padding: 0 14px 0 8px;
+    font-size: 0.75rem;
+    color: var(--mid);
+    flex-shrink: 0;
+  }
+
+  /* Doc sub-items inside a mob-row */
+  .mob-doc-list {
+    margin-top: 10px;
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+  }
+
+  .mob-doc-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+    cursor: pointer;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mob-doc-item:last-child { border-bottom: none; }
+
+  .mob-doc-title {
+    font-family: var(--body);
+    font-size: 0.72rem;
+    color: var(--black);
+    line-height: 1.3;
+  }
+
+  .mob-doc-sub {
+    font-family: var(--body);
+    font-size: 0.58rem;
+    color: var(--mid);
+    display: block;
+    margin-top: 2px;
+  }
+
+  .mob-doc-tag {
+    font-family: var(--body);
+    font-size: 0.48rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--mid);
+    margin-left: 6px;
+    opacity: 0.7;
+  }
+
+  .mob-doc-arrow {
+    font-size: 0.7rem;
+    color: var(--mid);
+    flex-shrink: 0;
+    margin-left: 8px;
   }
 </style>
 </head>
@@ -319,18 +498,8 @@
 <canvas id="canvas"></canvas>
 
 
-<!-- MOBILE PAN VIEWPORT — shown on all mobile -->
-
-<div id="mobile-pan-viewport">
-  <div id="mobile-pan-world">
-    <canvas id="mobile-pan-canvas"></canvas>
-    <!-- nodes injected here by JS -->
-  </div>
-  <!-- pan hint -->
-  <div id="pan-hint" style="position:absolute;bottom:14px;left:50%;transform:translateX(-50%);font-family:var(--body);font-size:0.52rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--mid);opacity:0.6;pointer-events:none;white-space:nowrap;">
-    drag to pan
-  </div>
-</div>
+<!-- MOBILE LIST VIEW -->
+<div id="mobile-list"></div>
 
 <!-- PASSWORD OVERLAY -->
 <div id="pw-overlay" style="position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;">
@@ -417,6 +586,36 @@ if (_isAuthed()) {
 // ════════════════════════════════════════════════════════
 const nodes = [
   {
+    id: 'docs-whitepapers',
+    label: 'White Papers',
+    desc: 'Framework, architecture & systems',
+    type: 'internal · google docs',
+    status: 'live',
+    url: null,
+    cls: 'docs',
+    pos: [16, 24],
+    group: 'docs',
+    docs: [
+      { title: 'Official White Paper', sub: 'Capital structure, system architecture & operational framework', tag: 'Mar 2026', url: 'https://docs.google.com/document/d/1YFobWr_kHWAQFPPqLRcIjh8yT5MJLkLCYIPho4vLyEo/edit?usp=sharing' },
+      { title: 'Kill Window System', sub: 'Kill Window capital management system — proprietary', tag: '', url: 'https://docs.google.com/document/d/1Qs5g3dDmWDEJnHnzXL1ulUr48dmjUxGIMFg2TAThQJw/edit?usp=sharing' },
+      { title: 'Elenora Capital White Paper', sub: 'Proprietary trading firm concept & architecture', tag: 'Draft', url: 'https://docs.google.com/document/d/1lbTT1vuu5XFHM2zvyvyonM9HieRLbdwrKbumzIghP14/edit?usp=sharing' },
+    ],
+  },
+  {
+    id: 'docs-legal',
+    label: 'Legal',
+    desc: 'Agreements & disclosures',
+    type: 'internal · google docs',
+    status: 'live',
+    url: null,
+    cls: 'docs',
+    pos: [16, 48],
+    group: 'docs',
+    docs: [
+      { title: 'Loan Agreement Template', sub: 'Standard & account build-up program blank contract', tag: 'Final · Feb 2026', url: 'https://docs.google.com/document/d/1A-oBO-ObkRb0n3KbUJq_yYxR8qbaCT2LUPFDMbf-ZCY/edit?usp=sharing' },
+    ],
+  },
+  {
     id: 'main',
     label: 'Main Website',
     desc: 'Primary company presence',
@@ -424,7 +623,7 @@ const nodes = [
     status: 'live',
     url: 'https://www.bayfallmorrigan.com/',
     cls: 'main',
-    pos: [50, 19],
+    pos: [50, 18],
     group: 'core',
   },
   {
@@ -435,7 +634,7 @@ const nodes = [
     status: 'live',
     url: 'https://bayfallmorrigan.github.io/capitaldesk/',
     cls: 'capital',
-    pos: [50, 50],
+    pos: [50, 48],
     badge: 'Protected',
     group: 'core',
   },
@@ -447,7 +646,7 @@ const nodes = [
     status: 'live',
     url: 'https://bayfallmorrigan.github.io/Monte-Carlo-/',
     cls: '',
-    pos: [70, 48],
+    pos: [50, 72],
     group: 'tools',
   },
   {
@@ -458,7 +657,7 @@ const nodes = [
     status: 'live',
     url: 'https://bayfallmorrigan.github.io/Standard-Account-Simulator/',
     cls: '',
-    pos: [67, 64],
+    pos: [36, 72],
     group: 'tools',
   },
   {
@@ -469,7 +668,7 @@ const nodes = [
     status: 'live',
     url: 'https://bayfallmorrigan.github.io/Account-Build-Up-Simulator/',
     cls: '',
-    pos: [67, 79],
+    pos: [36, 88],
     group: 'tools',
   },
   {
@@ -480,8 +679,52 @@ const nodes = [
     status: 'live',
     url: 'https://bayfallmorrigan.github.io/ABU-YIELD-CALCULATOR/',
     cls: '',
-    pos: [67, 92],
+    pos: [50, 88],
     group: 'tools',
+  },
+  {
+    id: 'contracts-connor',
+    label: 'Connor — Contracts',
+    desc: 'Active client agreements on file',
+    type: 'pdf · download',
+    status: 'live',
+    url: null,
+    cls: 'python-tool',
+    pos: [82, 24],
+    group: 'contracts',
+    docs: [
+      { title: 'Connor ABU', sub: 'Account Build-Up agreement', tag: '', url: 'https://raw.githubusercontent.com/BayfallMorrigan/ConnorABU/main/connorabu.pdf', download: true },
+      { title: 'Connor Unity Transfer', sub: 'Unity transfer agreement', tag: '', url: 'https://raw.githubusercontent.com/BayfallMorrigan/ConnorUnityTransfer/main/Connorunitytransfer.pdf', download: true },
+    ],
+  },
+  {
+    id: 'contracts-sienna',
+    label: 'Sienna — Contracts',
+    desc: 'Active client agreements on file',
+    type: 'pdf · download',
+    status: 'live',
+    url: null,
+    cls: 'python-tool',
+    pos: [82, 44],
+    group: 'contracts',
+    docs: [
+      { title: 'Sienna ABU', sub: 'Account Build-Up agreement', tag: '', url: 'https://raw.githubusercontent.com/BayfallMorrigan/Sienna-Account-Build-Up/main/siennaabu.pdf', download: true },
+    ],
+  },
+  {
+    id: 'contracts-gerald',
+    label: 'Gerald W. Ronan — Contracts',
+    desc: 'Active client agreements on file',
+    type: 'pdf · download',
+    status: 'live',
+    url: null,
+    cls: 'python-tool',
+    pos: [82, 62],
+    group: 'contracts',
+    docs: [
+      { title: 'Gerald — Original', sub: 'Original loan agreement', tag: '', url: 'https://raw.githubusercontent.com/BayfallMorrigan/Gerald-W-Ronan-Original/main/GeraldOriginal.pdf', download: true },
+      { title: 'Gerald — Amended', sub: 'Amended loan agreement', tag: '', url: 'https://raw.githubusercontent.com/BayfallMorrigan/Gerald-W-Ronan-Amended/main/GeraldAmended.pdf', download: true },
+    ],
   },
   {
     id: 'dailymover',
@@ -492,7 +735,7 @@ const nodes = [
     url: null,
     download: 'https://github.com/BayfallMorrigan/pythontools/raw/main/daily_mover_scanner.zip',
     cls: 'python-tool',
-    pos: [30, 50],
+    pos: [18, 70],
     group: 'python',
   },
   {
@@ -504,12 +747,20 @@ const nodes = [
     url: null,
     download: 'https://github.com/BayfallMorrigan/pythontools/raw/main/backtest_scanner.zip',
     cls: 'python-tool',
-    pos: [30, 65],
+    pos: [18, 86],
     group: 'python',
   },
 ];
 
 const edges = [
+  ['main', 'docs-whitepapers'],
+  ['main', 'docs-legal'],
+  ['docs-whitepapers', 'docs-legal'],
+  ['main', 'contracts-connor'],
+  ['main', 'contracts-sienna'],
+  ['main', 'contracts-gerald'],
+  ['contracts-connor', 'contracts-sienna'],
+  ['contracts-sienna', 'contracts-gerald'],
   ['main', 'capital'],
   ['main', 'accsim1'],
   ['main', 'accsim2'],
@@ -536,6 +787,7 @@ function isMobile() {
 }
 
 function handleClick(n) {
+  if (n.docs) return; // links inside the card handle navigation
   if (n.download) {
     const a = document.createElement('a');
     a.href = n.download; a.download = '';
@@ -546,6 +798,26 @@ function handleClick(n) {
 }
 
 function nodeCardHTML(n) {
+  if (n.docs) {
+    const links = n.docs.map(d => d.download
+      ? `<a class="doc-item" href="${d.url}" download target="_blank">
+          ${d.title}${d.tag ? `<span class="doc-item-tag">${d.tag}</span>` : ''}
+          <span class="doc-item-sub">${d.sub} ↓</span>
+        </a>`
+      : `<a class="doc-item" href="${d.url}" target="_blank">
+          ${d.title}${d.tag ? `<span class="doc-item-tag">${d.tag}</span>` : ''}
+          <span class="doc-item-sub">${d.sub}</span>
+        </a>`
+    ).join('');
+    return `
+      <div class="node-card">
+        <div class="node-label">${n.label}</div>
+        <div class="node-desc">${n.desc}</div>
+        <div class="doc-list">${links}</div>
+      </div>
+    `;
+  }
+  if (n.id === 'docs') return ''; // safety fallback
   return `
     <div class="node-card">
       ${n.badge ? `<div class="badge">${n.badge}</div>` : ''}
@@ -631,145 +903,83 @@ function resizeDesktopCanvas() {
 }
 
 // ════════════════════════════════════════════════════════
-//  MOBILE LANDSCAPE — pannable world
+//  MOBILE LIST VIEW
 // ════════════════════════════════════════════════════════
-const WORLD_W = 1500;
-const WORLD_H = 1400;
+const mobileList = document.getElementById('mobile-list');
 
-const panViewport = document.getElementById('mobile-pan-viewport');
-const panWorld    = document.getElementById('mobile-pan-world');
-const panCanvas   = document.getElementById('mobile-pan-canvas');
-const panCtx      = panCanvas.getContext('2d');
-panCanvas.width   = WORLD_W;
-panCanvas.height  = WORLD_H;
+const mobGroups = [
+  { label: 'Core', ids: ['main', 'capital'], rowCls: '' },
+  { label: 'Documentation', ids: ['docs-whitepapers', 'docs-legal'], rowCls: 'docs-row' },
+  { label: 'Client Contracts', ids: ['contracts-connor', 'contracts-sienna', 'contracts-gerald'], rowCls: 'contract-row' },
+  { label: 'Trading Tools', ids: ['montecarlo', 'accsim1', 'accsim2', 'abuyield'], rowCls: '' },
+  { label: 'Python Tools', ids: ['dailymover', 'backtest'], rowCls: '' },
+];
 
-let panX = 0, panY = 0;
-let panT = 0;
-let panAnim = false;
-let dragging = false, lastTX = 0, lastTY = 0;
-let tapStartX = 0, tapStartY = 0, tapMoved = false;
+function buildMobileList() {
+  mobileList.innerHTML = '';
+  mobGroups.forEach(group => {
+    const groupNodes = group.ids.map(id => nodes.find(n => n.id === id)).filter(Boolean);
+    if (!groupNodes.length) return;
 
-function clampPan(x, y) {
-  const vw = window.innerWidth;
-  const vh = window.innerHeight - 48;
-  return {
-    x: Math.max(Math.min(0, vw - WORLD_W), Math.min(0, x)),
-    y: Math.max(Math.min(0, vh - WORLD_H), Math.min(0, y)),
-  };
-}
-function applyPan() {
-  panWorld.style.transform = `translate(${panX}px, ${panY}px)`;
-}
+    const section = document.createElement('div');
+    section.className = 'mob-section';
 
-panViewport.addEventListener('touchstart', e => {
-  if (e.touches.length !== 1) return;
-  e.preventDefault();
-  dragging = true; tapMoved = false;
-  lastTX = tapStartX = e.touches[0].clientX;
-  lastTY = tapStartY = e.touches[0].clientY;
-}, { passive: false });
+    const label = document.createElement('div');
+    label.className = 'mob-section-label';
+    label.textContent = group.label;
+    section.appendChild(label);
 
-panViewport.addEventListener('touchmove', e => {
-  e.preventDefault();
-  if (!dragging || e.touches.length !== 1) return;
-  const dx = e.touches[0].clientX - lastTX;
-  const dy = e.touches[0].clientY - lastTY;
-  lastTX = e.touches[0].clientX;
-  lastTY = e.touches[0].clientY;
-  if (Math.abs(dx) > 3 || Math.abs(dy) > 3) tapMoved = true;
-  // Only mark as a drag (not tap) if finger moved more than 10px total
-  const totalDx = e.touches[0].clientX - tapStartX;
-  const totalDy = e.touches[0].clientY - tapStartY;
-  if (Math.abs(totalDx) > 10 || Math.abs(totalDy) > 10) tapMoved = true;
-  const c = clampPan(panX + dx, panY + dy);
-  panX = c.x; panY = c.y;
-  applyPan();
-}, { passive: false });
+    groupNodes.forEach(n => {
+      const rowCls = n.cls === 'main' ? 'main-row' : n.cls === 'capital' ? 'capital-row' : group.rowCls;
 
-panViewport.addEventListener('touchend', e => {
-  dragging = false;
-  if (!tapMoved) {
-    // Use where the finger actually lifted, not where it landed
-    const touch = e.changedTouches[0];
-    const tx = touch.clientX;
-    const ty = touch.clientY;
-    nodes.forEach(n => {
-      const el = document.getElementById(`mob-node-${n.id}`);
-      if (!el) return;
-      const r = el.getBoundingClientRect();
-      // Expand hit area by 16px on all sides for easier tapping
-      if (tx >= r.left - 16 && tx <= r.right + 16 && ty >= r.top - 16 && ty <= r.bottom + 16) {
-        handleClick(n);
+      if (n.docs) {
+        // Expandable doc/contract card
+        const row = document.createElement('div');
+        row.className = `mob-row ${rowCls}`;
+        row.innerHTML = `
+          <div class="mob-accent-bar"></div>
+          <div class="mob-row-body">
+            <div class="mob-row-title">${n.label}</div>
+            <div class="mob-row-desc">${n.desc}</div>
+            <div class="mob-doc-list">
+              ${n.docs.map(d => `
+                <a class="mob-doc-item" href="${d.url}" ${d.download ? 'download' : 'target="_blank"'}>
+                  <div>
+                    <div class="mob-doc-title">${d.title}${d.tag ? `<span class="mob-doc-tag">${d.tag}</span>` : ''}</div>
+                    <span class="mob-doc-sub">${d.sub}</span>
+                  </div>
+                  <span class="mob-doc-arrow">${d.download ? '↓' : '↗'}</span>
+                </a>`).join('')}
+            </div>
+          </div>`;
+        section.appendChild(row);
+
+      } else {
+        // Tappable single-action row
+        const row = document.createElement('div');
+        row.className = `mob-row ${rowCls}`;
+        row.innerHTML = `
+          <div class="mob-accent-bar"></div>
+          <div class="mob-row-body">
+            <div class="mob-row-title">${n.label}${n.badge ? ` <span style="font-family:var(--body);font-size:0.48rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);margin-left:6px;">${n.badge}</span>` : ''}</div>
+            <div class="mob-row-desc">${n.desc}</div>
+            <div class="mob-row-footer">
+              <div class="mob-status ${n.status}">
+                <div class="mob-status-dot"></div>${n.status}
+              </div>
+              <div class="mob-row-type">${n.type}</div>
+            </div>
+          </div>
+          <div class="mob-arrow">${n.download ? '↓' : '↗'}</div>`;
+        row.addEventListener('click', () => handleClick(n));
+        section.appendChild(row);
       }
     });
-  }
-});
 
-// Block pinch-zoom everywhere on mobile
-document.addEventListener('touchmove', e => {
-  if (e.touches.length > 1) e.preventDefault();
-}, { passive: false });
-
-function buildMobilePan() {
-  nodes.forEach(n => {
-    const el = document.getElementById(`node-${n.id}`);
-    if (el && el.parentNode === document.body) el.style.display = 'none';
-  });
-  panWorld.querySelectorAll('.node').forEach(el => el.remove());
-
-  nodes.forEach(n => {
-    const el = document.createElement('div');
-    el.className = `node ${n.cls || ''}`;
-    el.id = `mob-node-${n.id}`;
-    el.style.left = (n.pos[0] / 100) * WORLD_W + 'px';
-    el.style.top  = (n.pos[1] / 100) * WORLD_H + 'px';
-    el.innerHTML  = nodeCardHTML(n);
-    el.addEventListener('click', () => handleClick(n));
-    panWorld.appendChild(el);
+    mobileList.appendChild(section);
   });
 
-  // Start centered on the graph
-  const vw = window.innerWidth;
-  const vh = window.innerHeight - 48;
-  const c = clampPan((vw - WORLD_W) / 2, (vh - WORLD_H) / 2);
-  panX = c.x; panY = c.y;
-  applyPan();
-  panViewport.style.display = 'block';
-}
-
-function mobileNodeCenter(id) {
-  const el = document.getElementById(`mob-node-${id}`);
-  if (!el) return null;
-  return { x: parseFloat(el.style.left), y: parseFloat(el.style.top) };
-}
-
-function drawMobilePan() {
-  if (!panAnim) return;
-  panCtx.clearRect(0, 0, WORLD_W, WORLD_H);
-  panT += 0.003;
-  edges.forEach(([a, b], i) => {
-    const p1 = mobileNodeCenter(a);
-    const p2 = mobileNodeCenter(b);
-    if (!p1 || !p2) return;
-    const isGold    = a === 'main'    || b === 'main';
-    const isCapital = a === 'capital' || b === 'capital';
-    const grad = panCtx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
-    if (isGold) { grad.addColorStop(0,'rgba(138,106,42,0.5)'); grad.addColorStop(1,'rgba(138,106,42,0.08)'); }
-    else if (isCapital) { grad.addColorStop(0,'rgba(42,79,138,0.42)'); grad.addColorStop(1,'rgba(42,79,138,0.06)'); }
-    else { grad.addColorStop(0,'rgba(0,0,0,0.12)'); grad.addColorStop(1,'rgba(0,0,0,0.03)'); }
-    panCtx.beginPath(); panCtx.moveTo(p1.x,p1.y); panCtx.lineTo(p2.x,p2.y);
-    panCtx.strokeStyle = grad; panCtx.lineWidth = 1.5; panCtx.stroke();
-    const phase = (panT * 0.55 + i * 0.41) % 1;
-    const dotX  = p1.x + (p2.x - p1.x) * phase;
-    const dotY  = p1.y + (p2.y - p1.y) * phase;
-    const alpha = 0.5 + Math.sin(phase * Math.PI) * 0.5;
-    panCtx.beginPath(); panCtx.arc(dotX, dotY, 2.5, 0, Math.PI * 2);
-    if (isGold) panCtx.fillStyle = `rgba(138,106,42,${alpha})`;
-    else if (isCapital) panCtx.fillStyle = `rgba(42,79,138,${alpha})`;
-    else panCtx.fillStyle = `rgba(0,0,0,${alpha * 0.3})`;
-    panCtx.fill();
-  });
-  requestAnimationFrame(drawMobilePan);
+  mobileList.style.display = 'block';
 }
 
 // ════════════════════════════════════════════════════════
@@ -778,15 +988,9 @@ function drawMobilePan() {
 function init() {
   if (isMobile()) {
     desktopAnim = false;
-    buildMobilePan();
-    if (!panAnim) {
-      panAnim = true;
-      requestAnimationFrame(drawMobilePan);
-    }
-
+    buildMobileList();
   } else {
-    panViewport.style.display = 'none';
-    panAnim = false;
+    mobileList.style.display = 'none';
     buildDesktop();
     resizeDesktopCanvas();
     if (!desktopAnim) {
