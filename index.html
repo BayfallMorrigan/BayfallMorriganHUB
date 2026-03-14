@@ -231,40 +231,23 @@
      MOBILE — landscape: show the full graph, scaled down
   ──────────────────────────────────────────── */
 
-  /* Portrait on a phone — show the rotate screen */
-  #rotate-prompt {
-    display: none;
-    position: fixed; inset: 0; z-index: 8000;
-    background: var(--bg);
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0;
-  }
-  #rotate-prompt::before {
-    content: '';
-    position: fixed; inset: 0; pointer-events: none;
-    background-image:
-      linear-gradient(rgba(0,0,0,0.022) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,0,0,0.022) 1px, transparent 1px);
-    background-size: 52px 52px;
-  }
-
+  /* Portrait mobile — show pan viewport just like landscape */
   @media (max-width: 900px) and (orientation: portrait) {
-    #rotate-prompt { display: flex; }
-
-    /* hide everything else */
-    header, #canvas, body::before { display: none !important; }
-    .node { display: none !important; }
+    header { padding: 0 20px; height: 48px; }
+    .logo { font-size: 0.95rem; }
+    .logo span { display: none; }
+    .header-right { font-size: 0.56rem; gap: 16px; }
+    body > .node, #canvas { display: none !important; }
+    body::before { display: none !important; }
   }
 
   /* ── Mobile landscape: pannable infinite canvas ── */
   #mobile-pan-viewport {
-    display: none; /* shown by JS in landscape mobile */
+    display: none; /* shown by JS on all mobile */
     position: fixed;
     top: 48px; left: 0; right: 0; bottom: 0;
     overflow: hidden;
-    touch-action: none; /* we handle touch manually */
+    touch-action: none;
     cursor: grab;
     z-index: 5;
   }
@@ -335,23 +318,9 @@
 
 <canvas id="canvas"></canvas>
 
-<!-- ROTATE PROMPT — shown in portrait on mobile -->
-<div id="rotate-prompt">
-  <div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;padding:0 32px;text-align:center;">
-    <div style="font-size:2.8rem;margin-bottom:24px;opacity:0.35;animation:nudge 2s ease-in-out infinite;">&#8635;</div>
-    <div style="font-family:var(--display);font-size:1.6rem;font-weight:300;font-style:italic;color:var(--black);margin-bottom:8px;line-height:1.1;">Rotate your device</div>
-    <div style="font-family:var(--body);font-size:0.75rem;color:var(--mid);line-height:1.7;max-width:240px;">Turn your device to landscape and view the Bayfall Morrigan: Proprietary Material Hub network.</div>
-  </div>
-</div>
 
-<style>
-@keyframes nudge {
-  0%, 100% { transform: rotate(-15deg); opacity: 0.3; }
-  50%       { transform: rotate(15deg);  opacity: 0.5; }
-}
-</style>
+<!-- MOBILE PAN VIEWPORT — shown on all mobile -->
 
-<!-- MOBILE PAN VIEWPORT — landscape only -->
 <div id="mobile-pan-viewport">
   <div id="mobile-pan-world">
     <canvas id="mobile-pan-canvas"></canvas>
@@ -562,6 +531,9 @@ function isPortraitMobile() {
 function isLandscapeMobile() {
   return window.innerWidth < 1024 && window.innerHeight <= window.innerWidth && window.innerHeight < 520;
 }
+function isMobile() {
+  return isPortraitMobile() || isLandscapeMobile();
+}
 
 function handleClick(n) {
   if (n.download) {
@@ -662,7 +634,7 @@ function resizeDesktopCanvas() {
 //  MOBILE LANDSCAPE — pannable world
 // ════════════════════════════════════════════════════════
 const WORLD_W = 1500;
-const WORLD_H = 960;
+const WORLD_H = 1400;
 
 const panViewport = document.getElementById('mobile-pan-viewport');
 const panWorld    = document.getElementById('mobile-pan-world');
@@ -804,15 +776,7 @@ function drawMobilePan() {
 //  Responsive init
 // ════════════════════════════════════════════════════════
 function init() {
-  const prompt = document.getElementById('rotate-prompt');
-
-  if (isPortraitMobile()) {
-    prompt.style.display = 'flex';
-    panViewport.style.display = 'none';
-    desktopAnim = false; panAnim = false;
-
-  } else if (isLandscapeMobile()) {
-    prompt.style.display = 'none';
+  if (isMobile()) {
     desktopAnim = false;
     buildMobilePan();
     if (!panAnim) {
@@ -821,7 +785,6 @@ function init() {
     }
 
   } else {
-    prompt.style.display = 'none';
     panViewport.style.display = 'none';
     panAnim = false;
     buildDesktop();
