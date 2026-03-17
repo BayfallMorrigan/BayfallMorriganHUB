@@ -637,6 +637,7 @@ const nodes = [
     pos: [50, 48],
     badge: 'Protected',
     group: 'core',
+    launch: true,
   },
   {
     id: 'montecarlo',
@@ -644,10 +645,23 @@ const nodes = [
     desc: 'Probabilistic scenario modelling',
     type: 'tool',
     status: 'live',
-    url: 'https://bayfallmorrigan.github.io/Monte-Carlo-/',
+    url: 'https://drive.google.com/drive/folders/1YcQdDPJtFO-9gHBhR7QERy-da8_wyh8L?usp=sharing',
     cls: '',
     pos: [50, 72],
     group: 'tools',
+    launchMC: true,
+  },
+  {
+    id: 'bargraph',
+    label: 'Bar Graph Generator',
+    desc: 'MC dynamic bar graph output tool',
+    type: 'local · electron',
+    status: 'live',
+    url: 'https://drive.google.com/drive/folders/1nkGrkTr3BZ1VXq8pbuuYqHkfuCnf1GIo?usp=sharing',
+    cls: 'python-tool',
+    pos: [62, 82],
+    group: 'tools',
+    launchBG: true,
   },
   {
     id: 'accsim1',
@@ -690,7 +704,7 @@ const nodes = [
     status: 'live',
     url: 'https://drive.google.com/drive/folders/1wbWt_0dFRfP9fzAl-QukbSA_cwHwoOp4?usp=sharing',
     cls: 'python-tool',
-    pos: [70, 38],
+    pos: [78, 22],
     group: 'contracts',
   },
   {
@@ -701,7 +715,7 @@ const nodes = [
     status: 'live',
     url: null,
     cls: 'docs',
-    pos: [70, 60],
+    pos: [78, 42],
     group: 'databases',
     docs: [
       { title: 'Kill Window Quant Sample Database', sub: 'Quantitative sample data', tag: '', url: 'https://docs.google.com/spreadsheets/d/1F3ftl31yNotAKa-YtW6kY0FoCbHqUl_0O1uh0vaegVk/edit?usp=sharing' },
@@ -710,28 +724,53 @@ const nodes = [
     ],
   },
   {
+    id: 'moneymanager',
+    label: 'Money Manager',
+    desc: 'Firm bookkeeping & account tracking',
+    type: 'local · mmex',
+    status: 'live',
+    url: 'https://moneymanagerex.org/',
+    cls: 'capital',
+    pos: [78, 62],
+    group: 'finance',
+    launchMM: true,
+  },
+  {
+    id: 'moneymanager-db',
+    label: 'MM Database',
+    desc: 'Firm database file — Drive access controlled',
+    type: 'google drive · restricted',
+    status: 'live',
+    url: 'https://drive.google.com/drive/folders/1hMCueWLYY6Vm--oTSQ-jAfR84Q6gSKPe?usp=sharing',
+    cls: 'docs',
+    pos: [78, 78],
+    group: 'finance',
+  },
+  {
     id: 'dailymover',
     label: 'Daily Mover Scanner',
     desc: 'Finviz top gainers watcher · runs locally',
     type: 'python · local',
-    status: 'download',
-    url: null,
-    download: 'https://github.com/BayfallMorrigan/pythontools/raw/main/daily_mover_scanner.zip',
+    status: 'live',
+    url: 'https://drive.google.com/drive/folders/1vS7L4L466xAbNOoQT3ffrip8NwZkBHeP?usp=sharing',
+    download: null,
     cls: 'python-tool',
     pos: [18, 70],
     group: 'python',
+    launchDM: true,
   },
   {
     id: 'backtest',
     label: 'Backtest Scanner',
     desc: 'Signal replay engine · runs locally',
     type: 'python · local',
-    status: 'download',
-    url: null,
-    download: 'https://github.com/BayfallMorrigan/pythontools/raw/main/backtest_scanner.zip',
+    status: 'live',
+    url: 'https://drive.google.com/drive/folders/1JL_WyGq34BTI5MV4ykyZ4NrXL3AwBepQ?usp=sharing',
+    download: null,
     cls: 'python-tool',
     pos: [18, 86],
     group: 'python',
+    launchBacktest: true,
   },
 ];
 
@@ -745,10 +784,13 @@ const edges = [
   ['main', 'accsim1'],
   ['main', 'accsim2'],
   ['capital', 'montecarlo'],
+  ['montecarlo', 'bargraph'],
   ['capital', 'accsim1'],
   ['capital', 'accsim2'],
   ['accsim1', 'accsim2'],
   ['accsim2', 'abuyield'],
+  ['capital', 'moneymanager'],
+  ['moneymanager', 'moneymanager-db'],
   ['capital', 'dailymover'],
   ['capital', 'backtest'],
 ];
@@ -766,9 +808,105 @@ function isMobile() {
   return isPortraitMobile() || isLandscapeMobile();
 }
 
+// ── Capital Desk launcher ──────────────────────────────
+async function launchCapitalDesk(n) {
+  if (window.electronAPI) {
+    const result = await window.electronAPI.launchCapitalDesk();
+    if (result && result.success) return;
+    if (result && result.reason === 'not_found') {
+      const go = confirm('Capital Desk was not found on this device.\n\nClick OK to go to the download page.');
+      if (go) window.open(n.url, '_blank');
+    }
+    return;
+  }
+  window.open(n.url, '_blank');
+}
+
+// ── Money Manager launcher ─────────────────────────────
+async function launchMoneyManager(n) {
+  if (window.electronAPI) {
+    const result = await window.electronAPI.launchMoneyManager();
+    if (result && result.success) return;
+    if (result && result.reason === 'not_found') {
+      const go = confirm('Money Manager EX was not found on this device.\n\nClick OK to go to the download page.');
+      if (go) window.open(n.url, '_blank');
+    }
+    return;
+  }
+  window.open(n.url, '_blank');
+}
+
+// ── Monte Carlo launcher ───────────────────────────────
+async function launchMonteCarlo(n) {
+  if (window.electronAPI) {
+    const result = await window.electronAPI.launchMonteCarlo();
+    if (result && result.success) return;
+    if (result && result.reason === 'not_found') {
+      const go = confirm('Monte Carlo Simulator was not found on this device.\n\nClick OK to go to the download page.');
+      if (go) window.open(n.url, '_blank');
+    }
+    return;
+  }
+  window.open(n.url, '_blank');
+}
+
+// ── Bar Graph Generator launcher ──────────────────────
+async function launchBarGraph(n) {
+  if (window.electronAPI) {
+    const result = await window.electronAPI.launchBarGraph();
+    if (result && result.success) return;
+    if (result && result.reason === 'not_found') {
+      const go = confirm('MC Dynamic Bar Graph Generator was not found on this device.\n\nClick OK to go to the download page.');
+      if (go) window.open(n.url, '_blank');
+    }
+    return;
+  }
+  window.open(n.url, '_blank');
+}
+
+// ── Daily Mover Scanner launcher ──────────────────────
+async function launchDailyMover(n) {
+  if (window.electronAPI) {
+    const result = await window.electronAPI.launchDailyMover();
+    if (result && result.success) return;
+    if (result && result.reason === 'not_found') {
+      const go = confirm('Daily Mover Scanner was not found on this device.\n\nClick OK to go to the download page.');
+      if (go) window.open(n.url, '_blank');
+    }
+    return;
+  }
+  window.open(n.url, '_blank');
+}
+
+// ── Backtest Scanner launcher ──────────────────────────
+async function launchBacktest(n) {
+  if (window.electronAPI) {
+    const result = await window.electronAPI.launchBacktest();
+    if (result && result.success) return;
+    if (result && result.reason === 'not_found') {
+      const go = confirm('Backtest Scanner was not found on this device.\n\nClick OK to go to the download page.');
+      if (go) window.open(n.url, '_blank');
+    }
+    return;
+  }
+  window.open(n.url, '_blank');
+}
+
 function handleClick(n) {
-  if (n.docs) return; // links inside the card handle navigation
-  if (n.download) {
+  if (n.docs) return;
+  if (n.launch) {
+    launchCapitalDesk(n);
+  } else if (n.launchMM) {
+    launchMoneyManager(n);
+  } else if (n.launchMC) {
+    launchMonteCarlo(n);
+  } else if (n.launchBG) {
+    launchBarGraph(n);
+  } else if (n.launchDM) {
+    launchDailyMover(n);
+  } else if (n.launchBacktest) {
+    launchBacktest(n);
+  } else if (n.download) {
     const a = document.createElement('a');
     a.href = n.download; a.download = '';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
@@ -892,7 +1030,8 @@ const mobGroups = [
   { label: 'Documentation', ids: ['docs-whitepapers', 'docs-legal'], rowCls: 'docs-row' },
   { label: 'Client Contracts', ids: ['contracts'], rowCls: 'contract-row' },
   { label: 'Databases', ids: ['databases'], rowCls: 'docs-row' },
-  { label: 'Trading Tools', ids: ['montecarlo', 'accsim1', 'accsim2', 'abuyield'], rowCls: '' },
+  { label: 'Finance', ids: ['moneymanager', 'moneymanager-db'], rowCls: 'docs-row' },
+  { label: 'Trading Tools', ids: ['montecarlo', 'bargraph', 'accsim1', 'accsim2', 'abuyield'], rowCls: '' },
   { label: 'Python Tools', ids: ['dailymover', 'backtest'], rowCls: '' },
 ];
 
